@@ -1,0 +1,47 @@
+# .NET Desktop
+# Build and run tests for .NET Desktop or Windows classic desktop solutions.
+# Add steps that publish symbols, save build artifacts, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/apps/windows/dot-net
+
+trigger:
+- master
+
+pool:
+  vmImage: 'windows-latest'
+
+variables:
+  solution: 'build/VoidEngine.sln'
+  buildPlatform_x64: 'x64'
+  buildConfigurationRelease: 'Release'
+  buildConfigurationDebug: 'Debug'
+
+steps:
+- checkout: self
+  submodules: true
+
+#Generate visual studio solution
+- task: CMake@1
+  inputs:
+   workingDirectory: '.'
+   cmakeArgs: '. -B build'
+
+
+- task: VSBuild@1
+  inputs:
+    solution: '$(solution)'
+    platform: '$(buildPlatform_x64)'
+    configuration: '$(buildConfigurationDebug)'
+    maximumCpuCount: true
+
+# TODO: Figure out why my unit tests freeze this thing
+# - task: VSTest@2
+#   inputs:
+#     testSelector: 'testAssemblies'
+#     testAssemblyVer2: |
+#       **\*test*.dll
+#       !**\*TestAdapter.dll
+#       !**\obj\**
+#     searchFolder: '$(System.DefaultWorkingDirectory)'
+#     platform: '$(buildPlatform)'
+#     configuration: '$(buildConfiguration)'
+#     diagnosticsEnabled: true
